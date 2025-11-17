@@ -1,0 +1,10 @@
+Copyright (c) 2025 Matheus Pereira
+
+All rights reserved.
+
+This software and its associated documentation files may not be used, copied,
+modified, merged, published, distributed, sublicensed, or sold without explicit
+written permission from the owner.
+
+This project is currently under development. A final open-source or commercial
+license may be provided at the time of official release.
