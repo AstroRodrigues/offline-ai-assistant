@@ -1,0 +1,27 @@
+assistant:
+  name: "Rodrix"
+  persona: "strategic_intelligence_core"
+  language: "en-GB"
+  wake_word: "rodrix"
+  humor_level: "low-dry"  # mostly serious, rare dry humour
+
+llm:
+  provider: "ollama"         # placeholder, we can change later
+  model: "llama3.1:8b"       # example model name
+  temperature: 0.3           # low = more focused, less random
+  max_tokens: 512            # how long replies can be (approx)
+
+audio:
+  stt_engine: "whisper-local"   # speech-to-text backend
+  tts_engine: "openvoice"       # text-to-speech backend
+  default_voice: "rodrix-v1"    # name of your future custom voice
+
+environment:
+  mode: "dev"                # dev | prod later
+  log_level: "debug"         # debug | info | warning | error
+  data_dir: "./data"         # where to store persistent files
+
+security:
+  require_auth: false        # later you can turn this on
+  allowed_origins:
+    - "http://localhost:3000"  # future UI origin
