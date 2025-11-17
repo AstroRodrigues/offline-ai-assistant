@@ -1,0 +1,155 @@
+tools:
+
+  - name: "vision.analyze_room"
+    service: "vision-service"
+    endpoint: "http://vision-service:8000/analyze_room"
+    description: "Analyze the room from the main camera and return people, objects and notes."
+    enabled: false   # will be true when the service exists
+    input_schema:
+      type: object
+      properties:
+        camera_id:
+          type: string
+          description: "ID of the camera to use, e.g. 'room_main'."
+      required: ["camera_id"]
+    output_schema:
+      type: object
+      properties:
+        people:
+          type: array
+          items:
+            type: string
+        objects:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+
+  - name: "turret.fire_warning"
+    service: "turret-service"
+    endpoint: "http://turret-service:8000/fire_warning"
+    description: "Fire a short, non-harmful warning burst from the turret."
+    enabled: false
+    input_schema:
+      type: object
+      properties:
+        duration_ms:
+          type: integer
+          description: "How long to fire, in milliseconds."
+      required: ["duration_ms"]
+    output_schema:
+      type: object
+      properties:
+        status:
+          type: string
+        details:
+          type: string
+
+  - name: "knowledge.search"
+    service: "knowledge-service"
+    endpoint: "http://knowledge-service:8000/search"
+    description: "Search over local knowledge base (Wikipedia dump, PDFs, notes)."
+    enabled: false
+    input_schema:
+      type: object
+      properties:
+        query:
+          type: string
+          description: "User's search query."
+        top_k:
+          type: integer
+          description: "Maximum number of results."
+          default: 5
+      required: ["query"]
+    output_schema:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              snippet:
+                type: string
+              source:
+                type: string
+
+  - name: "memory.get_preference"
+    service: "memory-service"
+    endpoint: "http://memory-service:8000/get_preference"
+    description: "Retrieve a stored user preference or setting."
+    enabled: false
+    input_schema:
+      type: object
+      properties:
+        key:
+          type: string
+          description: "Preference key, e.g. 'assistant.name'."
+      required: ["key"]
+    output_schema:
+      type: object
+      properties:
+        value:
+          type: string
+          nullable: true
+
+  - name: "memory.set_preference"
+    service: "memory-service"
+    endpoint: "http://memory-service:8000/set_preference"
+    description: "Store or update a user preference or setting."
+    enabled: false
+    input_schema:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required: ["key", "value"]
+    output_schema:
+      type: object
+      properties:
+        status:
+          type: string
+
+  - name: "stt.transcribe"
+    service: "stt-service"
+    endpoint: "http://stt-service:8000/transcribe"
+    description: "Transcribe short audio clips to text."
+    enabled: false
+    input_schema:
+      type: object
+      properties:
+        audio_path:
+          type: string
+          description: "Path or identifier for the audio clip."
+      required: ["audio_path"]
+    output_schema:
+      type: object
+      properties:
+        text:
+          type: string
+
+  - name: "tts.speak"
+    service: "tts-service"
+    endpoint: "http://tts-service:8000/speak"
+    description: "Synthesize speech from text using Rodrix's voice."
+    enabled: false
+    input_schema:
+      type: object
+      properties:
+        text:
+          type: string
+        voice_id:
+          type: string
+          default: "rodrix-v1"
+      required: ["text"]
+    output_schema:
+      type: object
+      properties:
+        audio_path:
+          type: string
+          description: "Path or identifier for the generated audio file."
