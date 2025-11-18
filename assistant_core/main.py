@@ -9,6 +9,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from pathlib import Path
+from .llm_client import llm_client
 import yaml
 
 # ---------- Load settings from configs/settings.yaml ----------
@@ -70,8 +71,8 @@ def health_check():
         "persona": settings.assistant.persona,
     }
 
-@app.post("/chat", response_model=ChatResponse)
-def chat(req: ChatRequest):
+#@app.post("/chat", response_model=ChatResponse)
+#def chat(req: ChatRequest):
     """
     First placeholder version of /chat.
 
@@ -84,16 +85,43 @@ def chat(req: ChatRequest):
     - It will call tools based on tools.yaml.
     - It will build proper responses and actions.
     """
+  #  text = req.message.strip()
+
+  #  if not text:
+  #      rodrix_reply = "No input detected."
+ #   else:
+ #       rodrix_reply = (
+  #          f"{req.user_id}, I received your message: '{text}'. "
+ #           "My higher reasoning core is not online yet, "
+ #           "but the communication channel is operational."
+ #       )
+#
+ #   return ChatResponse(
+ #       assistant_name=settings.assistant.name,
+ #       reply=rodrix_reply,
+ #   )
+@app.post("/chat", response_model=ChatResponse)
+def chat(req: ChatRequest):
+    """
+    /chat endpoint.
+
+    Flow now:
+    - Take the user's message.
+    - Build a prompt (we can make this richer later, with persona, context, tools).
+    - Send it to the LLM service (/generate).
+    - Return the LLM's answer as Rodrix's reply.
+    """
     text = req.message.strip()
 
     if not text:
         rodrix_reply = "No input detected."
     else:
-        rodrix_reply = (
-            f"{req.user_id}, I received your message: '{text}'. "
-            "My higher reasoning core is not online yet, "
-            "but the communication channel is operational."
-        )
+        # For now we send the raw user text as the prompt.
+        # Later, we will wrap it with instructions, memory, and tool context.
+        prompt = text
+
+        # Call the LLM service
+        rodrix_reply = llm_client.generate(prompt)
 
     return ChatResponse(
         assistant_name=settings.assistant.name,
