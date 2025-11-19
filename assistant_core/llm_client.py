@@ -22,7 +22,7 @@ class LLMClient:
 
         # simple synchronous request – enough for now
         try:
-            resp = httpx.post(url, json=payload, timeout=10.0)
+            resp = httpx.post(url, json=payload, timeout=60.0)
             resp.raise_for_status()
         except httpx.RequestError:
             # LLM service unreachable / network error
