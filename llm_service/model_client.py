@@ -24,39 +24,52 @@ class OllamaLLMClient:
         self.base_url = base_url.rstrip("/")
         self.model = model
 
+
     def generate(self, prompt: str) -> str:
         prompt = prompt.strip()
         if not prompt:
             return "Rodrix: No input received."
 
+    # Normalize potential weird unicode (safety)
+        prompt = prompt.encode("ascii", "replace").decode("ascii")
+
+    # SYSTEM + USER prompt construction
+        full_prompt = (
+        "You are an AI assistant named Rodrix. "
+        "You speak in a concise, confident, strategic tone. "
+        "Respond directly to the user's message.\n\n"
+        f"User: {prompt}\n"
+        "Assistant:"
+    )
+
         url = f"{self.base_url}/api/generate"
         payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "stream": False,  # simpler: get the full response at once
-        }
+        "model": self.model,
+        "prompt": full_prompt,
+        "stream": False
+    }
 
         try:
             resp = httpx.post(url, json=payload, timeout=60.0)
             resp.raise_for_status()
         except httpx.RequestError:
             return (
-                "Rodrix: I attempted to contact my local reasoning engine (Ollama), "
-                "but the service is unreachable."
-            )
+            "Rodrix: I attempted to contact my local reasoning engine (Ollama), "
+            "but the service is unreachable."
+        )
         except httpx.HTTPStatusError as e:
             return (
-                f"Rodrix: The local LLM backend returned an error status: "
-                f"{e.response.status_code}. Reasoning is temporarily unavailable."
-            )
+            f"Rodrix: The local LLM backend returned an error: {e.response.status_code}. "
+            "Reasoning is temporarily unavailable."
+        )
 
         data = resp.json()
-        # Ollama returns { "model": "...", "created_at": "...", "response": "..." , ...}
         text = data.get("response", "").strip()
         if not text:
             return "Rodrix: The LLM responded with an empty output."
 
         return text
+
 
 
 class MockLLMClient:
