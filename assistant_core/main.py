@@ -127,3 +127,17 @@ def chat(req: ChatRequest):
         assistant_name=settings.assistant.name,
         reply=rodrix_reply,
     )
+
+@app.get("/tool/ping")
+def tool_ping():
+    """
+    system.ping tool endpoint.
+
+    This is a simple “alive check” tool used to validate the tools pipeline (checks the tools.yaml).
+    It will always return quickly and never fail unless assistant_core is down.
+    """
+    return {
+        "tool": "system.ping",
+        "status": "ok",
+        "message": "Tool pipeline online. Rodrix systems nominal."
+    }

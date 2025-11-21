@@ -153,3 +153,10 @@ tools:
         audio_path:
           type: string
           description: "Path or identifier for the generated audio file."
+
+  - name: "system.ping"
+    description: "Internal self-test tool."
+    service: "assistant_core"
+    endpoint: "/tool/ping"
+    enabled: true
+
