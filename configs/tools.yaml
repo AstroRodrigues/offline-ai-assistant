@@ -160,3 +160,11 @@ tools:
     endpoint: "/tool/ping"
     enabled: true
 
+  - name: "system.time_now"
+    description: "Return the current local time on the machine."
+    service: "assistant_core"
+    endpoint: "/tool/time_now"
+    enabled: true
+
+
+

@@ -11,6 +11,11 @@ from pydantic import BaseModel
 from pathlib import Path
 from .llm_client import llm_client
 import yaml
+from .tools_registry import list_tools
+from .tool_executor import parse_tool_call, execute_tool
+from datetime import datetime
+
+
 
 # ---------- Load settings from configs/settings.yaml ----------
 
@@ -58,6 +63,19 @@ class ChatResponse(BaseModel):
     reply: str
 
 # ---------- Routes ----------
+
+@app.get("/tools")
+def get_tools(enabled: bool | None = None):
+    """
+    List registered tools from configs/tools.yaml.
+
+    Query param:
+      - enabled=true  → only enabled tools
+      - enabled=false → only disabled tools
+      - omitted       → all tools
+    """
+    return list_tools(enabled=enabled)
+
 
 @app.get("/health")
 def health_check():
@@ -122,6 +140,17 @@ def chat(req: ChatRequest):
 
         # Call the LLM service
         rodrix_reply = llm_client.generate(prompt)
+        tool_call = parse_tool_call(rodrix_reply)
+        if tool_call:
+            tool_name, args = tool_call
+            tool_result = execute_tool(tool_name, args)
+
+            # Feed tool result back to Rodrix for a final answer
+            followup_prompt = (
+                f"Tool '{tool_name}' returned:\n{tool_result}\n\n"
+                "Use this result to answer the user."
+            )
+            rodrix_reply = llm_client.generate(followup_prompt)
 
     return ChatResponse(
         assistant_name=settings.assistant.name,
@@ -140,4 +169,17 @@ def tool_ping():
         "tool": "system.ping",
         "status": "ok",
         "message": "Tool pipeline online. Rodrix systems nominal."
+    }
+
+@app.get("/tool/time_now")
+def tool_time_now():
+    """
+    system.time_now tool endpoint.
+    Returns the current local time in ISO format.
+    """
+    now = datetime.now()
+    return {
+        "tool": "system.time_now",
+        "iso_time": now.isoformat(timespec="seconds"),
+        "pretty": now.strftime("%A %d %B %Y, %H:%M:%S")
     }
